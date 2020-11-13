@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Book;
+use App\Models\Author;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -64,7 +65,7 @@ class BookManagementTest extends TestCase
         ]);
 
         $this->assertEquals('New Title', Book::first()->title);
-        $this->assertEquals('New Author', Book::first()->author);
+        $this->assertEquals(4, Book::first()->author_id);
         $response->assertRedirect($book->fresh()->path());
     }
 
@@ -83,5 +84,22 @@ class BookManagementTest extends TestCase
 
         $this->assertCount(0, Book::all());
         $response->assertRedirect('/books');
+    }
+
+    /** @test */
+    public function a_new_author_is_automatically_added()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/store', [
+            'title' => 'Cool Book Title',
+            'author' => 'Author'
+        ]);
+
+        $book = Book::first();
+        $author = Author::first();
+
+        $this->assertEquals($author->id, $book->author_id);
+        $this->assertCount(1, Author::all());
     }
 }
